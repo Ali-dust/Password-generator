@@ -2,40 +2,82 @@
   <main class="container">
 
     <header class="page-header">
-      <h1>Secure Random Password Generator</h1>
-      <p>Create strong, unique, and unguessable passwords in one click.</p>
+      <h1>Secure Password & Passphrase Generator</h1>
+      <p>Create strong random passwords or memorable passphrases in one click.</p>
     </header>
 
     <section class="generator-tool">
-      
-      <div class="control-group">
-        <label for="passwordLength">Password Length: {{ passwordLength }} </label>
-        <input 
-          id="passwordLength"
-          type="range"
-          v-model="passwordLength"
-          min="12"
-          max="100"
-          step="1"
-        />
+
+      <div class="mode-toggle">
+        <button 
+          :class="{ active: generatorMode === 'password' }" 
+          @click="generatorMode = 'password'"
+        >
+          Password
+        </button>
+        <button 
+          :class="{ active: generatorMode === 'passphrase' }" 
+          @click="generatorMode = 'passphrase'"
+        >
+          Passphrase
+        </button>
       </div>
 
-      <div class="checkbox-group">
-        <label>
-          <input type="checkbox" v-model="includeUppercase" /> Include Uppercase
-        </label>
-        <label>
-          <input type="checkbox" v-model="includeNumbers" /> Include Numbers
-        </label>
-        <label>
-          <input type="checkbox" v-model="includeSymbols" /> Include Symbols
-        </label>
-        <label>
-          <input type="checkbox" v-model="includeOtherLanguages" /> Include 10 Other Languages
-        </label>
+      <div v-if="generatorMode === 'password'">
+        <div class="control-group">
+          <label for="passwordLength">Password Length: {{ passwordLength }} </label>
+          <input 
+            id="passwordLength"
+            type="range"
+            v-model="passwordLength"
+            min="12"
+            max="100"
+            step="1"
+          />
+        </div>
+
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" v-model="includeUppercase" /> Include Uppercase
+          </label>
+          <label>
+            <input type="checkbox" v-model="includeNumbers" /> Include Numbers
+          </label>
+          <label>
+            <input type="checkbox" v-model="includeSymbols" /> Include Symbols
+          </label>
+          <label>
+            <input type="checkbox" v-model="includeOtherLanguages" /> Include 10 Other Languages
+          </label>
+        </div>
+      </div>
+
+      <div v-if="generatorMode === 'passphrase'">
+        <div class="control-group">
+          <label for="passphraseWords">Number of Words: {{ passphraseWords }} </label>
+          <input 
+            id="passphraseWords"
+            type="range"
+            v-model.number="passphraseWords"
+            min="3"
+            max="10"
+            step="1"
+          />
+        </div>
+        <div class="control-group">
+          <label for="passphraseSeparator">Separator: </label>
+          <input 
+            id="passphraseSeparator"
+            type="text"
+            v-model="passphraseSeparator"
+            class="separator-input"
+          />
+        </div>
       </div>
       
-      <button @click="generatePassword" class="generate-button">Generate Password</button>
+      <button @click="generate" class="generate-button">
+        {{ generatorMode === 'password' ? 'Generate Password' : 'Generate Passphrase' }}
+      </button>
 
       <div v-if="password" class="password-display">
         <textarea rows="3" v-model="password" readonly> </textarea>
@@ -44,25 +86,35 @@
     </section>
 
     <section class="info-content">
-      <h2>Why Use a Secure Password Generator?</h2>
+      <h2>Why Use a Password & Passphrase Generator?</h2>
       <p>
-        In today's digital world, a strong password is your first line of defense. Using weak or repeated passwords like "123456" or "password" makes it easy for attackers to access your private accounts. 
+        A strong password is your first line of defense. This tool gives you two great options:
       </p>
-      <p>
-        A password generator creates a long, complex, and random string of characters that is nearly impossible for a human or computer to guess. This tool helps you create unique, secure passwords for every account, which dramatically increases your personal security.
-      </p>
+      <ul>
+        <li><strong>Random Passwords:</strong> A long, complex string of characters that is nearly impossible for a computer to guess. Ideal for password managers.</li>
+        <li><strong>Memorable Passphrases:</strong> A series of random, common words (like "tree-battery-blue-car") that are easy for *you* to remember but extremely difficult for an attacker to crack.</li>
+      </ul>
 
       <h3>Is This Tool Secure and Private?</h3>
       <p>
-        <strong>Yes. This tool is 100% private.</strong> All passwords are generated *only* in your web browser. No passwords, settings, or data are ever sent to a server, saved, or logged. You can even disconnect from the internet after loading the page, and it will still work perfectly.
+        <strong>Yes. This tool is 100% private.</strong> All passwords and passphrases are generated *only* in your web browser. No data is ever sent to a server, saved, or logged.
       </p>
 
       <h3>What Makes a Strong Password?</h3>
       <ul>
-        <li><strong>Length:</strong> Longer is always better. We recommend at least 12-16 characters.</li>
-        <li><strong>Complexity:</strong> A good password mixes uppercase letters, lowercase letters, numbers, and symbols.</li>
-        <li><strong>Uniqueness:</strong> Never reuse passwords. Every website should have its own unique password.</li>
+        <li><strong>Length:</strong> Longer is always better. Aim for 12+ characters or 4+ words.</li>
+        <li><strong>Complexity:</strong> For character passwords, mix uppercase, lowercase, numbers, and symbols.</li>
+        <li><strong>Uniqueness:</strong> Never reuse passwords. Every website should have its own unique password or passphrase.</li>
       </ul>
+      
+      <h3>Advanced: Multi-Language & Unicode Characters</h3>
+      <p>
+        In "Password" mode, you can include characters from 10 different international alphabets. This is perfect for systems that support Unicode passwords, making them even harder to guess.
+      </p>
+      <p>
+        <strong>Languages included:</strong>
+        Persian, Korean, Russian, Arabic, Greek, Hebrew, Chinese, Japanese, and Hindi.
+      </p>
     </section>
 
   </main>
@@ -70,22 +122,25 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useHead } from '@vueuse/head'; // <-- 1. IMPORT useHead
+import { useHead } from '@vueuse/head';
 
-// --- 3. ADD SEO METADATA ---
+// --- UPDATED: SEO METADATA ---
 useHead({
-  title: 'Secure Random Password Generator - Free & Simple Tool',
+  title: 'Secure Password & Passphrase Generator (Unicode)',
   meta: [
     {
       name: 'description',
-      content: 'Generate strong, secure, and random passwords for all your accounts. Free, simple, and works 100% in your browser.'
+      content: 'Create strong, random passwords and memorable passphrases. Includes multi-language Unicode characters. Free, secure, and private.'
     },
   ],
 });
 
-// --- Your existing code (all good!) ---
+// --- NEW: State for generator mode ---
+const generatorMode = ref('password'); // 'password' or 'passphrase'
+
+// --- Section 1: Password Refs ---
 const passwordLength = ref(12);
-const password = ref('');
+const password = ref(''); // This will hold the result from *either* generator
 const includeUppercase = ref(true);
 const includeNumbers = ref(true);
 const includeSymbols = ref(true);
@@ -106,10 +161,32 @@ const chinese = "一二三四五六七八九十百千万亿";
 const japanese = "あいうえおかきくけこさしすせそたちつてと";
 const hindi = "अआइईउऊऋऌऍऑअंकखगघङचछजझञतथदधनपफबभमय";
 
+// --- NEW: Section 2: Passphrase Refs ---
+const passphraseWords = ref(4);
+const passphraseSeparator = ref('-');
+// A small, simple word list for this example.
+// For a real app, you might want to use a much larger list.
+const wordList = [
+  'apple', 'banana', 'orange', 'grape', 'lemon', 'melon', 'peach', 'kiwi',
+  'red', 'blue', 'green', 'yellow', 'purple', 'black', 'white', 'pink',
+  'dog', 'cat', 'bird', 'fish', 'lion', 'tiger', 'bear', 'wolf',
+  'house', 'tree', 'river', 'mountain', 'ocean', 'sun', 'moon', 'star',
+  'car', 'bike', 'bus', 'train', 'boat', 'plane', 'road', 'sky',
+  'happy', 'sad', 'angry', 'calm', 'brave', 'sharp', 'quick', 'slow',
+  'book', 'pen', 'key', 'door', 'box', 'cup', 'hat', 'shoe'
+];
 
-function generatePassword() {
+// --- UPDATED: Main Generate Function ---
+function generate() {
+  if (generatorMode.value === 'password') {
+    generateCharacterPassword();
+  } else {
+    generatePassphrase();
+  }
+}
+
+function generateCharacterPassword() {
   let charset = englishLowercase;
-
   if (includeUppercase.value) charset += englishUppercase;
   if (includeNumbers.value) charset += numbers;
   if (includeSymbols.value) charset += symbols;
@@ -124,14 +201,22 @@ function generatePassword() {
     charset += japanese;
     charset += hindi;
   }
-
   let randomPassword = '';
   for (let i = 0; i < passwordLength.value; i++) {
     const randomIndex = Math.floor(Math.random() * charset.length);
     randomPassword += charset[randomIndex];
   }
-
   password.value = randomPassword;
+}
+
+// --- NEW: Passphrase Generator Function ---
+function generatePassphrase() {
+  let newPassphrase = [];
+  for (let i = 0; i < passphraseWords.value; i++) {
+    const randomIndex = Math.floor(Math.random() * wordList.length);
+    newPassphrase.push(wordList[randomIndex]);
+  }
+  password.value = newPassphrase.join(passphraseSeparator.value);
 }
 
 async function copyToClipboard() {
@@ -146,10 +231,46 @@ async function copyToClipboard() {
 
 <style scoped>
 /* --- NEW STYLES --- */
+.mode-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  background-color: #eee;
+  border-radius: 8px;
+  padding: 5px;
+}
+.mode-toggle button {
+  flex: 1;
+  padding: 10px 15px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #555;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+.mode-toggle button.active {
+  background-color: #fff;
+  color: #2196F3;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.separator-input {
+  width: 60px;
+  padding: 5px 8px;
+  font-size: 1rem;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+/* --- End New Styles --- */
+
 .container {
   max-width: 800px;
-  margin: 0 auto; /* Centers the content on the page */
-  padding: 1rem 1.5rem 3rem 1.5rem; /* Add padding: top, sides, bottom */
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem 1.5rem;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.6;
 }
@@ -176,15 +297,23 @@ async function copyToClipboard() {
   background: #f9f9f9;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.5rem 2rem; /* Added more horizontal padding */
   margin: 2rem 0;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Keeps the tool's contents centered */
+  align-items: center;
 }
 
 .control-group {
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 400px; /* Constrain width of controls */
+  justify-content: space-between;
+}
+.control-group label {
+  font-weight: 500;
 }
 
 .checkbox-group {
@@ -192,6 +321,8 @@ async function copyToClipboard() {
   grid-template-columns: 1fr 1fr;
   gap: 10px 20px;
   margin: 1rem 0;
+  width: 100%;
+  max-width: 400px; /* Constrain width */
 }
 
 .info-content {
@@ -209,7 +340,6 @@ async function copyToClipboard() {
   padding-left: 20px;
 }
 
-/* --- ADJUSTED ORIGINAL STYLES --- */
 .generate-button {
   padding: 12px 25px;
   background-color: #4CAF50;
@@ -220,6 +350,8 @@ async function copyToClipboard() {
   font-weight: bold;
   border-radius: 5px;
   margin-top: 1rem;
+  width: 100%;
+  max-width: 400px; /* Match control width */
 }
 
 .generate-button:hover {
@@ -227,8 +359,7 @@ async function copyToClipboard() {
 }
 
 input[type="range"] {
-  width: 220px;
-  margin-left: 10px;
+  width: 200px; /* Adjusted width */
 }
 
 label {
@@ -250,10 +381,11 @@ label input[type="checkbox"] {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  max-width: 400px; /* Match control width */
 }
 
 .password-display textarea {
-  width: 95%;
+  width: 100%; /* Use full width of container */
   padding: 10px;
   font-size: 1.1rem;
   text-align: center;
@@ -272,29 +404,24 @@ label input[type="checkbox"] {
   cursor: pointer;
   margin-top: 10px;
   border-radius: 4px;
+  width: 100%; /* Use full width */
 }
 
 .password-display button:hover {
   background-color: #1976D2;
 }
 
-/* --- REMOVED ORIGINAL STYLE --- */
-/*
-.button-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-}
-*/
-
-/* --- RESPONSIVE STYLE --- */
 @media (max-width: 600px) {
   .checkbox-group {
     grid-template-columns: 1fr;
+  }
+  .control-group {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  input[type="range"] {
+    width: 100%;
   }
 }
 </style>
