@@ -43,8 +43,6 @@
       </div>
     </section>
 
-    <AdDisplay />
-
     <section class="info-content">
       <h2>Why Use a Secure Password Generator?</h2>
       <p>
@@ -73,7 +71,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useHead } from '@vueuse/head'; // <-- 1. IMPORT useHead
-import AdDisplay from './components/AdDisplay.vue'; // <-- 2. IMPORT Ad component
 
 // --- 3. ADD SEO METADATA ---
 useHead({
